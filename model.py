@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 def hidden_init(layer):
-    fan_in = layer.weight.data.size()[0]
+    fan_in = layer.weight.data.size()[1]
     lim = 1. / np.sqrt(fan_in)
     return (-lim, lim)
 
@@ -64,7 +64,7 @@ class Critic(nn.Module):
     def reset_parameters(self):
         self.fcs1.weight.data.uniform_(*hidden_init(self.fcs1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
-        self.fc3.weight.data.uniform_(-3e-3, 3e-3)
+        self.fc3.weight.data.uniform_(-3e-4, 3e-4)
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
