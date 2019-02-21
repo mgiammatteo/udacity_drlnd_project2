@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 def hidden_init(layer):
-    fan_in = layer.weight.data.size()[1]
+    fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
     return (-lim, lim)
 
@@ -57,6 +57,9 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
         self.fcs1 = nn.Linear(state_size, fcs1_units)
+        # this is really surprising here as the number of input units of the second layer is actually fcs1_units+action_size!!
+        # this network is trying to approximate argmax_a Q(s,a)!!
+        # unlike DQN what we do is to approximate a function that maps state,action pairs to Q-values and from there we take the argmax
         self.fc2 = nn.Linear(fcs1_units+action_size, fc2_units)
         self.fc3 = nn.Linear(fc2_units, 1)
         self.reset_parameters()
@@ -64,7 +67,7 @@ class Critic(nn.Module):
     def reset_parameters(self):
         self.fcs1.weight.data.uniform_(*hidden_init(self.fcs1))
         self.fc2.weight.data.uniform_(*hidden_init(self.fc2))
-        self.fc3.weight.data.uniform_(-3e-4, 3e-4)
+        self.fc3.weight.data.uniform_(-3e-3, 3e-3)
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
